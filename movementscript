@@ -1,0 +1,280 @@
+-- [[ UNNAMED ENHANCEMENT: THE DEFINITIVE ALL-IN-ONE SUITE (V4.3 - GOD SPEED) ]] --
+local CONFIG = {
+    VoidDepth = -6700000,
+    OrbitRadius = 3.5,
+    OrbitSpeed = 45, 
+    MapSpread = 10000, 
+    OrbitYOffset = 0.5, 
+    AccentColor = Color3.fromRGB(85, 155, 255), 
+    MainBg = Color3.fromRGB(20, 20, 20),
+    BorderColor = Color3.fromRGB(45, 45, 45),
+}
+
+local DEFAULTS = { Radius = 3.5, Speed = 45, Void = -6700000, Spread = 10000 }
+
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local lp = game:GetService("Players").LocalPlayer
+
+local angle = 0
+local danceActive, danceTrack, currentAnimID = false, nil, nil
+local heightModes = {"Middle", "Above", "Under"}
+local currentHeightIdx = 1
+
+local Binds = { 
+    ["wallbang (tp)"] = Enum.KeyCode.Unknown, 
+    ["void spam"] = Enum.KeyCode.Unknown,
+    ["orbit"] = Enum.KeyCode.Unknown 
+}
+local states = { 
+    ["wallbang (tp)"] = false, 
+    ["void spam"] = false,
+    ["orbit"] = false 
+}
+
+local CheckboxObjects = {} 
+
+-- =========================================
+-- UTILS
+-- =========================================
+local function updateVisualToggles()
+    for name, button in pairs(CheckboxObjects) do
+        button.BackgroundColor3 = states[name] and CONFIG.AccentColor or Color3.fromRGB(35, 35, 35)
+    end
+end
+
+local function getMapCenter()
+    local model = game.Workspace:FindFirstChild("Map") or game.Workspace:FindFirstChild("Stage") or game.Workspace
+    if model:IsA("Model") then return model:GetModelCFrame().Position end
+    return Vector3.new(0, 50, 0)
+end
+
+local function getAnimFromCatalog(catalogID)
+    local success, obj = pcall(function() return game:GetObjects("rbxassetid://" .. catalogID)[1] end)
+    if success and obj then
+        if obj:IsA("Animation") then return obj.AnimationId end
+        local inner = obj:FindFirstChildWhichIsA("Animation", true)
+        if inner then return inner.AnimationId end
+    end
+    return "rbxassetid://" .. catalogID 
+end
+
+local function isTeammate(plr)
+    if not plr or plr == lp then return true end
+    local myTeamAttr = lp:GetAttribute("Team") or lp:GetAttribute("TeamID")
+    local plrTeamAttr = plr:GetAttribute("Team") or plr:GetAttribute("TeamID")
+    if myTeamAttr and plrTeamAttr and myTeamAttr == plrTeamAttr then return true end
+    if plr.Team and lp.Team and plr.Team == lp.Team then return true end
+    return false
+end
+
+local function getValidTarget()
+    local nearest, dist = nil, math.huge
+    local myRoot = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+    for _, v in pairs(game:GetService("Players"):GetPlayers()) do
+        if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local targetHum = v.Character:FindFirstChildOfClass("Humanoid")
+            if targetHum and targetHum.Health > 0 then
+                if not isTeammate(v) then
+                    local d = (myRoot.Position - v.Character.HumanoidRootPart.Position).Magnitude
+                    if d < dist then dist = d; nearest = v end
+                end
+            end
+        end
+    end
+    return nearest
+end
+
+local function stopEverything()
+    danceActive = false
+    if danceTrack then pcall(function() danceTrack:Stop(); danceTrack:Destroy() end); danceTrack = nil end
+    for k, _ in pairs(states) do states[k] = false end
+    updateVisualToggles()
+    local char = lp.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then 
+            hum:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+        end
+        if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
+    end
+end
+
+-- =========================================
+-- THE CORE ENGINE (GOD SPEED OPTIMIZED)
+-- =========================================
+RunService.RenderStepped:Connect(function(dt)
+    local char = lp.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not root or not hum then return end
+
+    if states["orbit"] or states["void spam"] or states["wallbang (tp)"] then
+        hum:SetStateEnabled(Enum.HumanoidStateType.Running, false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+        
+        -- High Velocity Overwrite
+        root.AssemblyLinearVelocity = Vector3.new(0, 9e9, 0)
+        root.AssemblyAngularVelocity = Vector3.new(0, 9e9, 0)
+
+        if states["orbit"] and states["void spam"] then
+            local t = tick() * 80
+            local s = CONFIG.MapSpread
+            local circleX = math.cos(t) * s
+            local circleZ = math.sin(t) * s
+            local rx, rz = math.random(-s, s), math.random(-s, s)
+            root.CFrame = CFrame.new(circleX + rx, CONFIG.VoidDepth, circleZ + rz) * CFrame.Angles(math.rad(math.random(0,360)), math.rad(math.random(0,360)), math.rad(math.random(0,360)))
+        
+        elseif states["orbit"] then
+            local center = getMapCenter()
+            local s = CONFIG.MapSpread
+            local t = tick() * 80
+            local circleX = math.cos(t) * s
+            local circleZ = math.sin(t) * s
+            local rx, ry, rz = math.random(-s, s), math.random(-s, s), math.random(-s, s)
+            root.CFrame = CFrame.new(center + Vector3.new(circleX + rx, ry, circleZ + rz)) * CFrame.Angles(math.rad(math.random(0,360)), math.rad(math.random(0,360)), math.rad(math.random(0,360)))
+        
+        elseif states["wallbang (tp)"] then
+            local target = getValidTarget()
+            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                local tRoot = target.Character.HumanoidRootPart
+                angle = (angle + (CONFIG.OrbitSpeed * dt)) % (math.pi * 2)
+                local offset = Vector3.new(math.cos(angle) * CONFIG.OrbitRadius, CONFIG.OrbitYOffset, math.sin(angle) * CONFIG.OrbitRadius)
+                root.CFrame = CFrame.lookAt(tRoot.Position + offset, tRoot.Position)
+            end
+
+        elseif states["void spam"] then
+            root.CFrame = CFrame.new(root.Position.X, CONFIG.VoidDepth, root.Position.Z)
+        end
+    else
+        if not hum:GetStateEnabled(Enum.HumanoidStateType.Running) then
+            hum:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+        end
+    end
+
+    if danceActive and currentAnimID then
+        local animator = hum:FindFirstChildOfClass("Animator")
+        if animator then
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            if not danceTrack or danceTrack.Animation.AnimationId ~= currentAnimID or not danceTrack.IsPlaying then
+                if danceTrack then pcall(function() danceTrack:Stop() end) end
+                local anim = Instance.new("Animation"); anim.AnimationId = currentAnimID
+                local s, nt = pcall(function() return animator:LoadAnimation(anim) end)
+                if s then danceTrack = nt; danceTrack.Priority = Enum.AnimationPriority.Action4; danceTrack.Looped = true; danceTrack:Play() end
+            end
+        end
+    end
+end)
+
+-- =========================================
+-- UI CONSTRUCTION
+-- =========================================
+local SG = Instance.new("ScreenGui", game:GetService("CoreGui"))
+local Main = Instance.new("Frame", SG); Main.BackgroundColor3 = CONFIG.MainBg; Main.BorderSizePixel = 1; Main.BorderColor3 = Color3.new(0,0,0); Main.Position = UDim2.new(0.5, -275, 0.5, -175); Main.Size = UDim2.new(0, 550, 0, 400); Main.Active = true
+
+local dragToggle, dragStart, startPos
+Main.InputBegan:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1) then
+        local objects = game:GetService("CoreGui"):GetGuiObjectsAtPosition(input.Position.X, input.Position.Y)
+        local clickingInteractable = false
+        for _, obj in pairs(objects) do
+            if obj:IsA("TextButton") or obj:IsA("TextBox") or obj.Name == "Sbg" then clickingInteractable = true; break end
+        end
+        if not clickingInteractable then
+            dragToggle = true; dragStart = input.Position; startPos = Main.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragToggle = false end end)
+        end
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement) then
+        local delta = input.Position - dragStart
+        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+local Inner = Instance.new("Frame", Main); Inner.Size = UDim2.new(1, -2, 1, -2); Inner.Position = UDim2.new(0, 1, 0, 1); Inner.BackgroundColor3 = CONFIG.MainBg; Inner.BorderColor3 = CONFIG.BorderColor
+local Title = Instance.new("TextLabel", Inner); Title.Size = UDim2.new(1, 0, 0, 25); Title.BackgroundTransparency = 1; Title.Text = "    evilperson232's movement script"; Title.Font = Enum.Font.Code; Title.TextColor3 = Color3.fromRGB(180, 180, 180); Title.TextSize = 12; Title.TextXAlignment = 0
+local Kill = Instance.new("TextButton", Inner); Kill.Size = UDim2.new(0, 25, 0, 25); Kill.Position = UDim2.new(1, -25, 0, 0); Kill.BackgroundTransparency = 1; Kill.Text = "X"; Kill.TextColor3 = Color3.new(1,0.2,0.2); Kill.MouseButton1Click:Connect(function() stopEverything(); SG:Destroy() end)
+
+local Tabs = Instance.new("Frame", Inner); Tabs.Position = UDim2.new(0, 5, 0, 25); Tabs.Size = UDim2.new(1, -10, 0, 22); Tabs.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Tabs.BorderColor3 = CONFIG.BorderColor
+local function createTab(name, x)
+    local b = Instance.new("TextButton", Tabs); b.Size = UDim2.new(0, 80, 1, 0); b.Position = UDim2.new(0, x, 0, 0); b.BackgroundColor3 = CONFIG.MainBg; b.BorderColor3 = CONFIG.BorderColor; b.Text = name; b.Font = Enum.Font.Code; b.TextSize = 11; b.TextColor3 = Color3.fromRGB(150, 150, 150); return b
+end
+local MainBtn = createTab("main", 0); local TrollBtn = createTab("troll", 81); MainBtn.TextColor3 = CONFIG.AccentColor
+
+local MainPage = Instance.new("Frame", Inner); MainPage.Position = UDim2.new(0, 10, 0, 60); MainPage.Size = UDim2.new(1, -20, 1, -90); MainPage.BackgroundTransparency = 1
+local TrollPage = Instance.new("Frame", Inner); TrollPage.Position = UDim2.new(0, 10, 0, 60); TrollPage.Size = UDim2.new(1, -20, 1, -90); TrollPage.Visible = false; TrollPage.BackgroundTransparency = 1
+
+MainBtn.MouseButton1Click:Connect(function() MainPage.Visible = true; TrollPage.Visible = false; MainBtn.TextColor3 = CONFIG.AccentColor; TrollBtn.TextColor3 = Color3.fromRGB(150, 150, 150) end)
+TrollBtn.MouseButton1Click:Connect(function() MainPage.Visible = false; TrollPage.Visible = true; TrollBtn.TextColor3 = CONFIG.AccentColor; MainBtn.TextColor3 = Color3.fromRGB(150, 150, 150) end)
+
+local function createCheck(p, t, x, y)
+    local B = Instance.new("TextButton", p); B.Size = UDim2.new(0, 12, 0, 12); B.Position = UDim2.new(0, x, 0, y); B.BackgroundColor3 = Color3.fromRGB(35, 35, 35); B.Text = ""
+    local L = Instance.new("TextLabel", p); L.Position = UDim2.new(0, x + 20, 0, y); L.Text = t; L.Font = Enum.Font.Code; L.TextSize = 11; L.TextColor3 = Color3.fromRGB(200, 200, 200); L.BackgroundTransparency = 1; L.TextXAlignment = 0
+    local KB = Instance.new("TextButton", p); KB.Position = UDim2.new(0, x + 110, 0, y); KB.Size = UDim2.new(0, 45, 0, 12); KB.BackgroundColor3 = Color3.fromRGB(30, 30, 30); KB.Text = "[none]"; KB.Font = Enum.Font.Code; KB.TextSize = 10; KB.TextColor3 = Color3.fromRGB(150, 150, 150)
+    CheckboxObjects[t] = B
+    B.MouseButton1Click:Connect(function() states[t] = not states[t]; updateVisualToggles() end)
+    KB.MouseButton1Click:Connect(function() KB.Text = "..."; local i = UIS.InputBegan:Wait(); if i.KeyCode ~= Enum.KeyCode.Unknown then Binds[t] = i.KeyCode; KB.Text = "["..i.KeyCode.Name:lower().."]" end end)
+end
+
+local function createSlider(p, t, x, y, min, max, def, func)
+    local L = Instance.new("TextLabel", p); L.Position = UDim2.new(0, x, 0, y); L.Text = t..": "..def; L.Font = Enum.Font.Code; L.TextSize = 10; L.TextColor3 = Color3.fromRGB(180, 180, 180); L.BackgroundTransparency = 1; L.TextXAlignment = 0
+    local Sbg = Instance.new("Frame", p); Sbg.Name = "Sbg"; Sbg.Position = UDim2.new(0, x, 0, y+14); Sbg.Size = UDim2.new(0, 180, 0, 6); Sbg.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Sbg.BorderSizePixel = 0
+    local Sf = Instance.new("Frame", Sbg); Sf.Size = UDim2.new((def-min)/(max-min), 0, 1, 0); Sf.BackgroundColor3 = CONFIG.AccentColor; Sf.BorderSizePixel = 0
+    local R = Instance.new("TextButton", p); R.Position = UDim2.new(0, x + 190, 0, y+10); R.Size = UDim2.new(0, 35, 0, 12); R.BackgroundColor3 = Color3.fromRGB(30, 30, 30); R.Text = "reset"; R.Font = Enum.Font.Code; R.TextSize = 9; R.TextColor3 = Color3.new(1,1,1)
+    local function set(v) v = math.floor(v * 10) / 10; Sf.Size = UDim2.new((v-min)/(max-min), 0, 1, 0); L.Text = t..": "..v; func(v) end
+    Sbg.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then local conn; local function update() local pcent = math.clamp((UIS:GetMouseLocation().X - Sbg.AbsolutePosition.X) / Sbg.AbsoluteSize.X, 0, 1); set(min + (max-min) * pcent) end; update(); conn = RunService.RenderStepped:Connect(function() if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then conn:Disconnect() else update() end end) end end)
+    R.MouseButton1Click:Connect(function() set(def) end)
+end
+
+-- PAGE 1 CONTENT
+createCheck(MainPage, "void spam", 10, 10)
+createSlider(MainPage, "void drop", 10, 40, -10000000, 0, DEFAULTS.Void, function(v) CONFIG.VoidDepth = v end)
+createCheck(MainPage, "orbit", 10, 80)
+createSlider(MainPage, "map spread", 10, 110, 10, 10000, DEFAULTS.Spread, function(v) CONFIG.MapSpread = v end)
+createCheck(MainPage, "wallbang (tp)", 280, 10)
+createSlider(MainPage, "radius", 280, 40, 0, 50, DEFAULTS.Radius, function(v) CONFIG.OrbitRadius = v end)
+createSlider(MainPage, "speed", 280, 80, 1, 500, DEFAULTS.Speed, function(v) CONFIG.OrbitSpeed = v end)
+
+local HeightBtn = Instance.new("TextButton", MainPage); HeightBtn.Size = UDim2.new(0, 180, 0, 20); HeightBtn.Position = UDim2.new(0, 280, 0, 120); HeightBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35); HeightBtn.Text = "Height: Middle"; HeightBtn.Font = Enum.Font.Code; HeightBtn.TextColor3 = Color3.new(1,1,1); HeightBtn.TextSize = 11
+HeightBtn.MouseButton1Click:Connect(function() currentHeightIdx = (currentHeightIdx % #heightModes) + 1; local mode = heightModes[currentHeightIdx]; HeightBtn.Text = "Height: " .. mode; if mode == "Middle" then CONFIG.OrbitYOffset = 0.5 elseif mode == "Above" then CONFIG.OrbitYOffset = 8 elseif mode == "Under" then CONFIG.OrbitYOffset = -8 end end)
+
+-- PAGE 2 CONTENT (Troll/Emotes)
+local function emoteBtn(name, catID, y)
+    local b = Instance.new("TextButton", TrollPage); b.Size = UDim2.new(0, 220, 0, 25); b.Position = UDim2.new(0, 10, 0, y); b.BackgroundColor3 = Color3.fromRGB(35, 35, 35); b.Text = name; b.Font = Enum.Font.Code; b.TextColor3 = Color3.fromRGB(200, 200, 200); b.TextSize = 11
+    b.MouseButton1Click:Connect(function() local animID = getAnimFromCatalog(catID); if danceActive and currentAnimID == animID then danceActive = false; if danceTrack then danceTrack:Stop() end; lp.Character.Animate.Disabled = false else currentAnimID = animID; danceActive = true end end)
+end
+
+-- Emote Search Box (Fixed Label and Placement)
+local SearchLabel = Instance.new("TextLabel", TrollPage); SearchLabel.Size = UDim2.new(0, 220, 0, 15); SearchLabel.Position = UDim2.new(0, 280, 0, 5); SearchLabel.BackgroundTransparency = 1; SearchLabel.Text = "emote id"; SearchLabel.Font = Enum.Font.Code; SearchLabel.TextColor3 = Color3.fromRGB(150, 150, 150); SearchLabel.TextSize = 10; SearchLabel.TextXAlignment = 0
+local SearchBox = Instance.new("TextBox", TrollPage); SearchBox.Size = UDim2.new(0, 220, 0, 25); SearchBox.Position = UDim2.new(0, 280, 0, 20); SearchBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30); SearchBox.BorderSizePixel = 1; SearchBox.BorderColor3 = CONFIG.BorderColor; SearchBox.Text = ""; SearchBox.PlaceholderText = "Emote ID Here..."; SearchBox.Font = Enum.Font.Code; SearchBox.TextColor3 = Color3.new(1,1,1); SearchBox.TextSize = 11
+local PlaySearch = Instance.new("TextButton", TrollPage); PlaySearch.Size = UDim2.new(0, 220, 0, 25); PlaySearch.Position = UDim2.new(0, 280, 0, 50); PlaySearch.BackgroundColor3 = CONFIG.AccentColor; PlaySearch.Text = "Play Emote"; PlaySearch.Font = Enum.Font.Code; PlaySearch.TextColor3 = Color3.new(1,1,1); PlaySearch.TextSize = 11
+
+PlaySearch.MouseButton1Click:Connect(function()
+    local rawID = SearchBox.Text:gsub("%D", "") 
+    if #rawID > 0 then
+        local animID = getAnimFromCatalog(rawID)
+        currentAnimID = animID
+        danceActive = true
+    end
+end)
+
+emoteBtn("Sinister Dance", "140307247566187", 5)
+emoteBtn("Tornado", "134029227396704", 35)
+emoteBtn("Zesty Sturdy", "120702604995324", 65)
+emoteBtn("Claw Machine", "138144229550843", 95)
+emoteBtn("67 Emote", "92707729249136", 125)
+emoteBtn("Spider Crawl", "71030475836153", 155)
+emoteBtn("Gun", "73562814360939", 185)
+
+UIS.InputBegan:Connect(function(i, p)
+    if not p and i.KeyCode == Enum.KeyCode.RightControl then Main.Visible = not Main.Visible
+    elseif not p and i.KeyCode ~= Enum.KeyCode.Unknown then
+        for name, key in pairs(Binds) do if i.KeyCode == key then states[name] = not states[name]; updateVisualToggles() end end
+    end
+end)
