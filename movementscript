@@ -1,280 +1,232 @@
--- [[ UNNAMED ENHANCEMENT: THE DEFINITIVE ALL-IN-ONE SUITE (V4.3 - GOD SPEED) ]] --
-local CONFIG = {
-    VoidDepth = -6700000,
-    OrbitRadius = 3.5,
-    OrbitSpeed = 45, 
-    MapSpread = 10000, 
-    OrbitYOffset = 0.5, 
-    AccentColor = Color3.fromRGB(85, 155, 255), 
-    MainBg = Color3.fromRGB(20, 20, 20),
-    BorderColor = Color3.fromRGB(45, 45, 45),
+local _0x000b = {
+_0x000c = -6700000,
+_0x000d = 3.5,
+_0x000e = 45,
+_0x000f = 10000,
+_0x0010 = 0.5,
+_0x0011 = _0x0012._0x0013(85, 155, 255),
+_0x0014 = _0x0012._0x0013(20, 20, 20),
+_0x0015 = _0x0012._0x0013(45, 45, 45),
 }
-
-local DEFAULTS = { Radius = 3.5, Speed = 45, Void = -6700000, Spread = 10000 }
-
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local lp = game:GetService("Players").LocalPlayer
-
-local angle = 0
-local danceActive, danceTrack, currentAnimID = false, nil, nil
-local heightModes = {"Middle", "Above", "Under"}
-local currentHeightIdx = 1
-
-local Binds = { 
-    ["wallbang (tp)"] = Enum.KeyCode.Unknown, 
-    ["void spam"] = Enum.KeyCode.Unknown,
-    ["orbit"] = Enum.KeyCode.Unknown 
+local _0x0016 = { _0x0017 = 3.5, _0x0018 = 45, _0x0019 = -6700000, _0x001a = 10000 }
+local _0x001b = _0x001c:_0x001d(string.char(85,115,101,114,73)..string.char(110,112,117,116,83)..string.char(101,114,118,105,99)..string.char(101))
+local _0x001e = _0x001c:_0x001d(string.char(82,117,110,83,101,114,118)..string.char(105,99,101))
+local _0x001f = _0x001c:_0x001d(string.char(80,108,97,121)..string.char(101,114,115))._0x0020
+local _0x0021 = 0
+local _0x0022, _0x0023, _0x0024 = false, nil, nil
+local _0x0025 = {string.char(77,105,100,100,108,101), string.char(65,98,111)..string.char(118,101), string.char(85,110,100,101,114)}
+local _0x0026 = 1
+local _0x0027 = {
+[string.char(119,97,108)..string.char(108,98,97)..string.char(110,103,32)..string.char(40,116,112)..string.char(41)] = _0x0028._0x0029._0x002a,
+[string.char(118,111,105,100,32)..string.char(115,112,97,109)] = _0x0028._0x0029._0x002a,
+[string.char(111,114,98,105,116)] = _0x0028._0x0029._0x002a
 }
-local states = { 
-    ["wallbang (tp)"] = false, 
-    ["void spam"] = false,
-    ["orbit"] = false 
+local _0x002b = {
+[string.char(119,97,108,108,98)..string.char(97,110,103,32,40)..string.char(116,112,41)] = false,
+[string.char(118,111,105,100,32)..string.char(115,112,97,109)] = false,
+[string.char(111,114,98,105,116)] = false
 }
-
-local CheckboxObjects = {} 
-
--- =========================================
--- UTILS
--- =========================================
-local function updateVisualToggles()
-    for name, button in pairs(CheckboxObjects) do
-        button.BackgroundColor3 = states[name] and CONFIG.AccentColor or Color3.fromRGB(35, 35, 35)
-    end
+local _0x002c = {}
+local function _0x002e()
+for _0x002f, _0x0030 in pairs(_0x002c) do
+_0x0030._0x0031 = _0x002b[_0x002f] and _0x000b._0x0011 or _0x0012._0x0013(35, 35, 35)
 end
-
-local function getMapCenter()
-    local model = game.Workspace:FindFirstChild("Map") or game.Workspace:FindFirstChild("Stage") or game.Workspace
-    if model:IsA("Model") then return model:GetModelCFrame().Position end
-    return Vector3.new(0, 50, 0)
 end
-
-local function getAnimFromCatalog(catalogID)
-    local success, obj = pcall(function() return game:GetObjects("rbxassetid://" .. catalogID)[1] end)
-    if success and obj then
-        if obj:IsA("Animation") then return obj.AnimationId end
-        local inner = obj:FindFirstChildWhichIsA("Animation", true)
-        if inner then return inner.AnimationId end
-    end
-    return "rbxassetid://" .. catalogID 
+local function _0x0032()
+local _0x0033 = _0x001c._0x0034:_0x0035(string.char(77,97,112)) or _0x001c._0x0034:_0x0035(string.char(83,116,97)..string.char(103,101)) or _0x001c._0x0034
+if _0x0033:_0x0036(string.char(77,111,100,101,108)) then return _0x0033:_0x0037()._0x0038 end
+return _0x0039._0x003a(0, 50, 0)
 end
-
-local function isTeammate(plr)
-    if not plr or plr == lp then return true end
-    local myTeamAttr = lp:GetAttribute("Team") or lp:GetAttribute("TeamID")
-    local plrTeamAttr = plr:GetAttribute("Team") or plr:GetAttribute("TeamID")
-    if myTeamAttr and plrTeamAttr and myTeamAttr == plrTeamAttr then return true end
-    if plr.Team and lp.Team and plr.Team == lp.Team then return true end
-    return false
+local function _0x003b(_0x003c)
+local _0x003d, _0x003e = pcall(function() return _0x001c:_0x003f(string.char(114,98,120,97,115,115)..string.char(101,116,105,100,58,47)..string.char(47) .. _0x003c)[1] end)
+if _0x003d and _0x003e then
+if _0x003e:_0x0036(string.char(65,110,105,109)..string.char(97,116,105,111)..string.char(110)) then return _0x003e._0x0040 end
+local _0x0041 = _0x003e:_0x0042(string.char(65,110,105,109,97)..string.char(116,105,111,110), true)
+if _0x0041 then return _0x0041._0x0040 end
 end
-
-local function getValidTarget()
-    local nearest, dist = nil, math.huge
-    local myRoot = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then return nil end
-    for _, v in pairs(game:GetService("Players"):GetPlayers()) do
-        if v ~= lp and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-            local targetHum = v.Character:FindFirstChildOfClass("Humanoid")
-            if targetHum and targetHum.Health > 0 then
-                if not isTeammate(v) then
-                    local d = (myRoot.Position - v.Character.HumanoidRootPart.Position).Magnitude
-                    if d < dist then dist = d; nearest = v end
-                end
-            end
-        end
-    end
-    return nearest
+return string.char(114,98,120,97,115)..string.char(115,101,116,105,100)..string.char(58,47,47) .. _0x003c
 end
-
-local function stopEverything()
-    danceActive = false
-    if danceTrack then pcall(function() danceTrack:Stop(); danceTrack:Destroy() end); danceTrack = nil end
-    for k, _ in pairs(states) do states[k] = false end
-    updateVisualToggles()
-    local char = lp.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then 
-            hum:SetStateEnabled(Enum.HumanoidStateType.Running, true)
-            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
-        end
-        if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-    end
+local function _0x0043(_0x0044)
+if not _0x0044 or _0x0044 == _0x001f then return true end
+local _0x0045 = _0x001f:_0x0046(string.char(84,101,97,109)) or _0x001f:_0x0046(string.char(84,101,97)..string.char(109,73,68))
+local _0x0047 = _0x0044:_0x0046(string.char(84,101,97,109)) or _0x0044:_0x0046(string.char(84,101,97,109,73)..string.char(68))
+if _0x0045 and _0x0047 and _0x0045 == _0x0047 then return true end
+if _0x0044._0x0048 and _0x001f._0x0048 and _0x0044._0x0048 == _0x001f._0x0048 then return true end
+return false
 end
-
--- =========================================
--- THE CORE ENGINE (GOD SPEED OPTIMIZED)
--- =========================================
-RunService.RenderStepped:Connect(function(dt)
-    local char = lp.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not root or not hum then return end
-
-    if states["orbit"] or states["void spam"] or states["wallbang (tp)"] then
-        hum:SetStateEnabled(Enum.HumanoidStateType.Running, false)
-        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-        
-        -- High Velocity Overwrite
-        root.AssemblyLinearVelocity = Vector3.new(0, 9e9, 0)
-        root.AssemblyAngularVelocity = Vector3.new(0, 9e9, 0)
-
-        if states["orbit"] and states["void spam"] then
-            local t = tick() * 80
-            local s = CONFIG.MapSpread
-            local circleX = math.cos(t) * s
-            local circleZ = math.sin(t) * s
-            local rx, rz = math.random(-s, s), math.random(-s, s)
-            root.CFrame = CFrame.new(circleX + rx, CONFIG.VoidDepth, circleZ + rz) * CFrame.Angles(math.rad(math.random(0,360)), math.rad(math.random(0,360)), math.rad(math.random(0,360)))
-        
-        elseif states["orbit"] then
-            local center = getMapCenter()
-            local s = CONFIG.MapSpread
-            local t = tick() * 80
-            local circleX = math.cos(t) * s
-            local circleZ = math.sin(t) * s
-            local rx, ry, rz = math.random(-s, s), math.random(-s, s), math.random(-s, s)
-            root.CFrame = CFrame.new(center + Vector3.new(circleX + rx, ry, circleZ + rz)) * CFrame.Angles(math.rad(math.random(0,360)), math.rad(math.random(0,360)), math.rad(math.random(0,360)))
-        
-        elseif states["wallbang (tp)"] then
-            local target = getValidTarget()
-            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                local tRoot = target.Character.HumanoidRootPart
-                angle = (angle + (CONFIG.OrbitSpeed * dt)) % (math.pi * 2)
-                local offset = Vector3.new(math.cos(angle) * CONFIG.OrbitRadius, CONFIG.OrbitYOffset, math.sin(angle) * CONFIG.OrbitRadius)
-                root.CFrame = CFrame.lookAt(tRoot.Position + offset, tRoot.Position)
-            end
-
-        elseif states["void spam"] then
-            root.CFrame = CFrame.new(root.Position.X, CONFIG.VoidDepth, root.Position.Z)
-        end
-    else
-        if not hum:GetStateEnabled(Enum.HumanoidStateType.Running) then
-            hum:SetStateEnabled(Enum.HumanoidStateType.Running, true)
-            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
-        end
-    end
-
-    if danceActive and currentAnimID then
-        local animator = hum:FindFirstChildOfClass("Animator")
-        if animator then
-            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-            if not danceTrack or danceTrack.Animation.AnimationId ~= currentAnimID or not danceTrack.IsPlaying then
-                if danceTrack then pcall(function() danceTrack:Stop() end) end
-                local anim = Instance.new("Animation"); anim.AnimationId = currentAnimID
-                local s, nt = pcall(function() return animator:LoadAnimation(anim) end)
-                if s then danceTrack = nt; danceTrack.Priority = Enum.AnimationPriority.Action4; danceTrack.Looped = true; danceTrack:Play() end
-            end
-        end
-    end
+local function _0x0049()
+local _0x004a, _0x004b = nil, math._0x004c
+local _0x004d = _0x001f._0x004e and _0x001f._0x004e:_0x0035(string.char(72,117,109,97,110,111)..string.char(105,100,82,111,111,116)..string.char(80,97,114,116))
+if not _0x004d then return nil end
+for _0x004f, _0x0050 in pairs(_0x001c:_0x001d(string.char(80,108,97,121,101,114,115)):_0x0051()) do
+if _0x0050 ~= _0x001f and _0x0050._0x004e and _0x0050._0x004e:_0x0035(string.char(72,117,109,97)..string.char(110,111,105,100)..string.char(82,111,111,116)..string.char(80,97,114,116)) then
+local _0x0052 = _0x0050._0x004e:_0x0053(string.char(72,117,109,97)..string.char(110,111,105,100))
+if _0x0052 and _0x0052._0x0054 > 0 then
+if not _0x0043(_0x0050) then
+local _0x0055 = (_0x004d._0x0038 - _0x0050._0x004e._0x0056._0x0038)._0x0057
+if _0x0055 < _0x004b then _0x004b = _0x0055; _0x004a = _0x0050 end
+end
+end
+end
+end
+return _0x004a
+end
+local function _0x0058()
+_0x0022 = false
+if _0x0023 then pcall(function() _0x0023:_0x0059(); _0x0023:_0x005a() end); _0x0023 = nil end
+for _0x005b, _0x004f in pairs(_0x002b) do _0x002b[_0x005b] = false end
+_0x002e()
+local char = _0x001f._0x004e
+if char then
+local _0x005c = char:_0x0053(string.char(72,117,109,97,110,111,105)..string.char(100))
+if _0x005c then
+_0x005c:_0x005d(_0x0028._0x005e._0x005f, true)
+_0x005c:_0x005d(_0x0028._0x005e._0x0060, true)
+end
+if char:_0x0035(string.char(65,110,105,109,97,116)..string.char(101)) then char._0x0061._0x0062 = false end
+end
+end
+_0x001e._0x0066:_0x0067(function(_0x0068)
+local char = _0x001f._0x004e
+if not char then return end
+local _0x0069 = char:_0x0035(string.char(72,117,109,97,110,111)..string.char(105,100,82,111,111,116)..string.char(80,97,114,116))
+local _0x005c = char:_0x0053(string.char(72,117,109,97)..string.char(110,111,105,100))
+if not _0x0069 or not _0x005c then return end
+if _0x002b[string.char(111,114,98,105,116)] or _0x002b[string.char(118,111,105)..string.char(100,32,115)..string.char(112,97,109)] or _0x002b[string.char(119,97,108)..string.char(108,98,97)..string.char(110,103,32)..string.char(40,116,112)..string.char(41)] then
+_0x005c:_0x005d(_0x0028._0x005e._0x005f, false)
+_0x005c:_0x005d(_0x0028._0x005e._0x0060, false)
+_0x0069._0x006d = _0x0039._0x003a(0, 9e9, 0)
+_0x0069._0x006e = _0x0039._0x003a(0, 9e9, 0)
+if _0x002b[string.char(111,114,98,105,116)] and _0x002b[string.char(118,111,105,100)..string.char(32,115,112,97)..string.char(109)] then
+local _0x006f = _0x0070() * 80
+local _0x0071 = _0x000b._0x000f
+local _0x0072 = math.cos(_0x006f) * _0x0071
+local _0x0073 = math.sin(_0x006f) * _0x0071
+local _0x0074, _0x0075 = math.random(-_0x0071, _0x0071), math.random(-_0x0071, _0x0071)
+_0x0069._0x0076 = _0x0076._0x003a(_0x0072 + _0x0074, _0x000b._0x000c, _0x0073 + _0x0075) * _0x0076._0x0077(math.rad(math.random(0,360)), math.rad(math.random(0,360)), math.rad(math.random(0,360)))
+elseif _0x002b[string.char(111,114,98,105,116)] then
+local _0x0078 = _0x0032()
+local _0x0071 = _0x000b._0x000f
+local _0x006f = _0x0070() * 80
+local _0x0072 = math.cos(_0x006f) * _0x0071
+local _0x0073 = math.sin(_0x006f) * _0x0071
+local _0x0074, _0x0079, _0x0075 = math.random(-_0x0071, _0x0071), math.random(-_0x0071, _0x0071), math.random(-_0x0071, _0x0071)
+_0x0069._0x0076 = _0x0076._0x003a(_0x0078 + _0x0039._0x003a(_0x0072 + _0x0074, _0x0079, _0x0073 + _0x0075)) * _0x0076._0x0077(math.rad(math.random(0,360)), math.rad(math.random(0,360)), math.rad(math.random(0,360)))
+elseif _0x002b[string.char(119,97,108,108,98,97)..string.char(110,103,32,40,116,112)..string.char(41)] then
+local _0x007a = _0x0049()
+if _0x007a and _0x007a._0x004e and _0x007a._0x004e:_0x0035(string.char(72,117,109,97,110)..string.char(111,105,100,82,111)..string.char(111,116,80,97,114)..string.char(116)) then
+local _0x007b = _0x007a._0x004e._0x0056
+_0x0021 = (_0x0021 + (_0x000b._0x000e * _0x0068)) % (math.pi * 2)
+local _0x007c = _0x0039._0x003a(math.cos(_0x0021) * _0x000b._0x000d, _0x000b._0x0010, math.sin(_0x0021) * _0x000b._0x000d)
+_0x0069._0x0076 = _0x0076._0x007d(_0x007b._0x0038 + _0x007c, _0x007b._0x0038)
+end
+elseif _0x002b[string.char(118,111,105,100,32,115)..string.char(112,97,109)] then
+_0x0069._0x0076 = _0x0076._0x003a(_0x0069._0x0038._0x007e, _0x000b._0x000c, _0x0069._0x0038._0x007f)
+end
+else
+if not _0x005c:_0x0080(_0x0028._0x005e._0x005f) then
+_0x005c:_0x005d(_0x0028._0x005e._0x005f, true)
+_0x005c:_0x005d(_0x0028._0x005e._0x0060, true)
+end
+end
+if _0x0022 and _0x0024 then
+local _0x0081 = _0x005c:_0x0053(string.char(65,110,105)..string.char(109,97,116)..string.char(111,114))
+if _0x0081 then
+if char:_0x0035(string.char(65,110,105,109)..string.char(97,116,101)) then char._0x0061._0x0062 = true end
+if not _0x0023 or _0x0023._0x0082._0x0040 ~= _0x0024 or not _0x0023._0x0083 then
+if _0x0023 then pcall(function() _0x0023:_0x0059() end) end
+local _0x0084 = _0x0085._0x003a(string.char(65,110,105,109,97,116,105)..string.char(111,110)); _0x0084._0x0040 = _0x0024
+local _0x0071, _0x0086 = pcall(function() return _0x0081:_0x0087(_0x0084) end)
+if _0x0071 then _0x0023 = _0x0086; _0x0023._0x0088 = _0x0028._0x0089._0x008a; _0x0023._0x008b = true; _0x0023:_0x008c() end
+end
+end
+end
 end)
-
--- =========================================
--- UI CONSTRUCTION
--- =========================================
-local SG = Instance.new("ScreenGui", game:GetService("CoreGui"))
-local Main = Instance.new("Frame", SG); Main.BackgroundColor3 = CONFIG.MainBg; Main.BorderSizePixel = 1; Main.BorderColor3 = Color3.new(0,0,0); Main.Position = UDim2.new(0.5, -275, 0.5, -175); Main.Size = UDim2.new(0, 550, 0, 400); Main.Active = true
-
-local dragToggle, dragStart, startPos
-Main.InputBegan:Connect(function(input)
-    if (input.UserInputType == Enum.UserInputType.MouseButton1) then
-        local objects = game:GetService("CoreGui"):GetGuiObjectsAtPosition(input.Position.X, input.Position.Y)
-        local clickingInteractable = false
-        for _, obj in pairs(objects) do
-            if obj:IsA("TextButton") or obj:IsA("TextBox") or obj.Name == "Sbg" then clickingInteractable = true; break end
-        end
-        if not clickingInteractable then
-            dragToggle = true; dragStart = input.Position; startPos = Main.Position
-            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragToggle = false end end)
-        end
-    end
+local _0x008f = _0x0085._0x003a(string.char(83,99,114)..string.char(101,101,110)..string.char(71,117,105), _0x001c:_0x001d(string.char(67,111,114,101,71)..string.char(117,105)))
+local _0x0090 = _0x0085._0x003a(string.char(70,114,97,109,101), _0x008f); _0x0090._0x0031 = _0x000b._0x0014; _0x0090._0x0091 = 1; _0x0090._0x0092 = _0x0012._0x003a(0,0,0); _0x0090._0x0038 = _0x0093._0x003a(0.5, -275, 0.5, -175); _0x0090._0x0094 = _0x0093._0x003a(0, 550, 0, 400); _0x0090._0x0095 = true
+local _0x0096, _0x0097, _0x0098
+_0x0090._0x0099:_0x0067(function(_0x009a)
+if (_0x009a._0x009b == _0x0028._0x009b._0x009c) then
+local _0x009d = _0x001c:_0x001d(string.char(67,111,114,101)..string.char(71,117,105)):_0x009e(_0x009a._0x0038._0x007e, _0x009a._0x0038._0x009f)
+local _0x00a0 = false
+for _0x004f, _0x003e in pairs(_0x009d) do
+if _0x003e:_0x0036(string.char(84,101,120,116,66)..string.char(117,116,116,111,110)) or _0x003e:_0x0036(string.char(84,101,120,116,66,111)..string.char(120)) or _0x003e._0x00a1 == string.char(83,98,103) then _0x00a0 = true; break end
+end
+if not _0x00a0 then
+_0x0096 = true; _0x0097 = _0x009a._0x0038; _0x0098 = _0x0090._0x0038
+_0x009a._0x00a2:_0x0067(function() if _0x009a._0x00a3 == _0x0028._0x00a3._0x00a4 then _0x0096 = false end end)
+end
+end
 end)
-UIS.InputChanged:Connect(function(input)
-    if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement) then
-        local delta = input.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
+_0x001b._0x00a5:_0x0067(function(_0x009a)
+if _0x0096 and (_0x009a._0x009b == _0x0028._0x009b._0x00a6) then
+local _0x00a7 = _0x009a._0x0038 - _0x0097
+_0x0090._0x0038 = _0x0093._0x003a(_0x0098._0x007e._0x00a8, _0x0098._0x007e._0x00a9 + _0x00a7._0x007e, _0x0098._0x009f._0x00a8, _0x0098._0x009f._0x00a9 + _0x00a7._0x009f)
+end
 end)
-
-local Inner = Instance.new("Frame", Main); Inner.Size = UDim2.new(1, -2, 1, -2); Inner.Position = UDim2.new(0, 1, 0, 1); Inner.BackgroundColor3 = CONFIG.MainBg; Inner.BorderColor3 = CONFIG.BorderColor
-local Title = Instance.new("TextLabel", Inner); Title.Size = UDim2.new(1, 0, 0, 25); Title.BackgroundTransparency = 1; Title.Text = "    evilperson232's movement script"; Title.Font = Enum.Font.Code; Title.TextColor3 = Color3.fromRGB(180, 180, 180); Title.TextSize = 12; Title.TextXAlignment = 0
-local Kill = Instance.new("TextButton", Inner); Kill.Size = UDim2.new(0, 25, 0, 25); Kill.Position = UDim2.new(1, -25, 0, 0); Kill.BackgroundTransparency = 1; Kill.Text = "X"; Kill.TextColor3 = Color3.new(1,0.2,0.2); Kill.MouseButton1Click:Connect(function() stopEverything(); SG:Destroy() end)
-
-local Tabs = Instance.new("Frame", Inner); Tabs.Position = UDim2.new(0, 5, 0, 25); Tabs.Size = UDim2.new(1, -10, 0, 22); Tabs.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Tabs.BorderColor3 = CONFIG.BorderColor
-local function createTab(name, x)
-    local b = Instance.new("TextButton", Tabs); b.Size = UDim2.new(0, 80, 1, 0); b.Position = UDim2.new(0, x, 0, 0); b.BackgroundColor3 = CONFIG.MainBg; b.BorderColor3 = CONFIG.BorderColor; b.Text = name; b.Font = Enum.Font.Code; b.TextSize = 11; b.TextColor3 = Color3.fromRGB(150, 150, 150); return b
+local _0x00aa = _0x0085._0x003a(string.char(70,114,97,109,101), _0x0090); _0x00aa._0x0094 = _0x0093._0x003a(1, -2, 1, -2); _0x00aa._0x0038 = _0x0093._0x003a(0, 1, 0, 1); _0x00aa._0x0031 = _0x000b._0x0014; _0x00aa._0x0092 = _0x000b._0x0015
+local _0x00ab = _0x0085._0x003a(string.char(84,101,120,116,76,97,98)..string.char(101,108), _0x00aa); _0x00ab._0x0094 = _0x0093._0x003a(1, 0, 0, 25); _0x00ab._0x00ac = 1; _0x00ab._0x00ad = string.char(32,32,32)..string.char(32,101,118)..string.char(105,108,112)..string.char(101,114,115)..string.char(111,110,50)..string.char(51,50,39)..string.char(115,32,109)..string.char(111,118,101)..string.char(109,101,110)..string.char(116,32,115)..string.char(99,114,105)..string.char(112,116); _0x00ab._0x00ae = _0x0028._0x00ae._0x00af; _0x00ab._0x00b0 = _0x0012._0x0013(180, 180, 180); _0x00ab._0x00b1 = 12; _0x00ab._0x00b2 = 0
+local _0x00b3 = _0x0085._0x003a(string.char(84,101,120,116,66,117,116)..string.char(116,111,110), _0x00aa); _0x00b3._0x0094 = _0x0093._0x003a(0, 25, 0, 25); _0x00b3._0x0038 = _0x0093._0x003a(1, -25, 0, 0); _0x00b3._0x00ac = 1; _0x00b3._0x00ad = string.char(88); _0x00b3._0x00b0 = _0x0012._0x003a(1,0.2,0.2); _0x00b3._0x00b4:_0x0067(function() _0x0058(); _0x008f:_0x005a() end)
+local _0x00b5 = _0x0085._0x003a(string.char(70,114,97,109,101), _0x00aa); _0x00b5._0x0038 = _0x0093._0x003a(0, 5, 0, 25); _0x00b5._0x0094 = _0x0093._0x003a(1, -10, 0, 22); _0x00b5._0x0031 = _0x0012._0x0013(30, 30, 30); _0x00b5._0x0092 = _0x000b._0x0015
+local function _0x00b6(_0x002f, _0x00b7)
+local _0x00b8 = _0x0085._0x003a(string.char(84,101,120)..string.char(116,66,117)..string.char(116,116,111)..string.char(110), _0x00b5); _0x00b8._0x0094 = _0x0093._0x003a(0, 80, 1, 0); _0x00b8._0x0038 = _0x0093._0x003a(0, _0x00b7, 0, 0); _0x00b8._0x0031 = _0x000b._0x0014; _0x00b8._0x0092 = _0x000b._0x0015; _0x00b8._0x00ad = _0x002f; _0x00b8._0x00ae = _0x0028._0x00ae._0x00af; _0x00b8._0x00b1 = 11; _0x00b8._0x00b0 = _0x0012._0x0013(150, 150, 150); return _0x00b8
 end
-local MainBtn = createTab("main", 0); local TrollBtn = createTab("troll", 81); MainBtn.TextColor3 = CONFIG.AccentColor
-
-local MainPage = Instance.new("Frame", Inner); MainPage.Position = UDim2.new(0, 10, 0, 60); MainPage.Size = UDim2.new(1, -20, 1, -90); MainPage.BackgroundTransparency = 1
-local TrollPage = Instance.new("Frame", Inner); TrollPage.Position = UDim2.new(0, 10, 0, 60); TrollPage.Size = UDim2.new(1, -20, 1, -90); TrollPage.Visible = false; TrollPage.BackgroundTransparency = 1
-
-MainBtn.MouseButton1Click:Connect(function() MainPage.Visible = true; TrollPage.Visible = false; MainBtn.TextColor3 = CONFIG.AccentColor; TrollBtn.TextColor3 = Color3.fromRGB(150, 150, 150) end)
-TrollBtn.MouseButton1Click:Connect(function() MainPage.Visible = false; TrollPage.Visible = true; TrollBtn.TextColor3 = CONFIG.AccentColor; MainBtn.TextColor3 = Color3.fromRGB(150, 150, 150) end)
-
-local function createCheck(p, t, x, y)
-    local B = Instance.new("TextButton", p); B.Size = UDim2.new(0, 12, 0, 12); B.Position = UDim2.new(0, x, 0, y); B.BackgroundColor3 = Color3.fromRGB(35, 35, 35); B.Text = ""
-    local L = Instance.new("TextLabel", p); L.Position = UDim2.new(0, x + 20, 0, y); L.Text = t; L.Font = Enum.Font.Code; L.TextSize = 11; L.TextColor3 = Color3.fromRGB(200, 200, 200); L.BackgroundTransparency = 1; L.TextXAlignment = 0
-    local KB = Instance.new("TextButton", p); KB.Position = UDim2.new(0, x + 110, 0, y); KB.Size = UDim2.new(0, 45, 0, 12); KB.BackgroundColor3 = Color3.fromRGB(30, 30, 30); KB.Text = "[none]"; KB.Font = Enum.Font.Code; KB.TextSize = 10; KB.TextColor3 = Color3.fromRGB(150, 150, 150)
-    CheckboxObjects[t] = B
-    B.MouseButton1Click:Connect(function() states[t] = not states[t]; updateVisualToggles() end)
-    KB.MouseButton1Click:Connect(function() KB.Text = "..."; local i = UIS.InputBegan:Wait(); if i.KeyCode ~= Enum.KeyCode.Unknown then Binds[t] = i.KeyCode; KB.Text = "["..i.KeyCode.Name:lower().."]" end end)
+local _0x00b9 = _0x00b6(string.char(109,97,105,110), 0); local _0x00ba = _0x00b6(string.char(116,114,111,108,108), 81); _0x00b9._0x00b0 = _0x000b._0x0011
+local _0x00bb = _0x0085._0x003a(string.char(70,114,97,109,101), _0x00aa); _0x00bb._0x0038 = _0x0093._0x003a(0, 10, 0, 60); _0x00bb._0x0094 = _0x0093._0x003a(1, -20, 1, -90); _0x00bb._0x00ac = 1
+local _0x00bc = _0x0085._0x003a(string.char(70,114,97,109,101), _0x00aa); _0x00bc._0x0038 = _0x0093._0x003a(0, 10, 0, 60); _0x00bc._0x0094 = _0x0093._0x003a(1, -20, 1, -90); _0x00bc._0x00bd = false; _0x00bc._0x00ac = 1
+_0x00b9._0x00b4:_0x0067(function() _0x00bb._0x00bd = true; _0x00bc._0x00bd = false; _0x00b9._0x00b0 = _0x000b._0x0011; _0x00ba._0x00b0 = _0x0012._0x0013(150, 150, 150) end)
+_0x00ba._0x00b4:_0x0067(function() _0x00bb._0x00bd = false; _0x00bc._0x00bd = true; _0x00ba._0x00b0 = _0x000b._0x0011; _0x00b9._0x00b0 = _0x0012._0x0013(150, 150, 150) end)
+local function _0x00be(_0x00bf, _0x006f, _0x00b7, _0x00c0)
+local _0x00c1 = _0x0085._0x003a(string.char(84,101,120)..string.char(116,66,117)..string.char(116,116,111)..string.char(110), _0x00bf); _0x00c1._0x0094 = _0x0093._0x003a(0, 12, 0, 12); _0x00c1._0x0038 = _0x0093._0x003a(0, _0x00b7, 0, _0x00c0); _0x00c1._0x0031 = _0x0012._0x0013(35, 35, 35); _0x00c1._0x00ad = ""
+local _0x00c2 = _0x0085._0x003a(string.char(84,101,120,116,76)..string.char(97,98,101,108), _0x00bf); _0x00c2._0x0038 = _0x0093._0x003a(0, _0x00b7 + 20, 0, _0x00c0); _0x00c2._0x00ad = _0x006f; _0x00c2._0x00ae = _0x0028._0x00ae._0x00af; _0x00c2._0x00b1 = 11; _0x00c2._0x00b0 = _0x0012._0x0013(200, 200, 200); _0x00c2._0x00ac = 1; _0x00c2._0x00b2 = 0
+local _0x00c3 = _0x0085._0x003a(string.char(84,101,120)..string.char(116,66,117)..string.char(116,116,111)..string.char(110), _0x00bf); _0x00c3._0x0038 = _0x0093._0x003a(0, _0x00b7 + 110, 0, _0x00c0); _0x00c3._0x0094 = _0x0093._0x003a(0, 45, 0, 12); _0x00c3._0x0031 = _0x0012._0x0013(30, 30, 30); _0x00c3._0x00ad = string.char(91,110,111,110,101,93); _0x00c3._0x00ae = _0x0028._0x00ae._0x00af; _0x00c3._0x00b1 = 10; _0x00c3._0x00b0 = _0x0012._0x0013(150, 150, 150)
+_0x002c[_0x006f] = _0x00c1
+_0x00c1._0x00b4:_0x0067(function() _0x002b[_0x006f] = not _0x002b[_0x006f]; _0x002e() end)
+_0x00c3._0x00b4:_0x0067(function() _0x00c3._0x00ad = string.char(46,46,46); local _0x00c4 = _0x001b._0x0099:_0x00c5(); if _0x00c4._0x0029 ~= _0x0028._0x0029._0x002a then _0x0027[_0x006f] = _0x00c4._0x0029; _0x00c3._0x00ad = string.char(91).._0x00c4._0x0029._0x00a1:lower()..string.char(93) end end)
 end
-
-local function createSlider(p, t, x, y, min, max, def, func)
-    local L = Instance.new("TextLabel", p); L.Position = UDim2.new(0, x, 0, y); L.Text = t..": "..def; L.Font = Enum.Font.Code; L.TextSize = 10; L.TextColor3 = Color3.fromRGB(180, 180, 180); L.BackgroundTransparency = 1; L.TextXAlignment = 0
-    local Sbg = Instance.new("Frame", p); Sbg.Name = "Sbg"; Sbg.Position = UDim2.new(0, x, 0, y+14); Sbg.Size = UDim2.new(0, 180, 0, 6); Sbg.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Sbg.BorderSizePixel = 0
-    local Sf = Instance.new("Frame", Sbg); Sf.Size = UDim2.new((def-min)/(max-min), 0, 1, 0); Sf.BackgroundColor3 = CONFIG.AccentColor; Sf.BorderSizePixel = 0
-    local R = Instance.new("TextButton", p); R.Position = UDim2.new(0, x + 190, 0, y+10); R.Size = UDim2.new(0, 35, 0, 12); R.BackgroundColor3 = Color3.fromRGB(30, 30, 30); R.Text = "reset"; R.Font = Enum.Font.Code; R.TextSize = 9; R.TextColor3 = Color3.new(1,1,1)
-    local function set(v) v = math.floor(v * 10) / 10; Sf.Size = UDim2.new((v-min)/(max-min), 0, 1, 0); L.Text = t..": "..v; func(v) end
-    Sbg.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then local conn; local function update() local pcent = math.clamp((UIS:GetMouseLocation().X - Sbg.AbsolutePosition.X) / Sbg.AbsoluteSize.X, 0, 1); set(min + (max-min) * pcent) end; update(); conn = RunService.RenderStepped:Connect(function() if not UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then conn:Disconnect() else update() end end) end end)
-    R.MouseButton1Click:Connect(function() set(def) end)
+local function _0x00c6(_0x00bf, _0x006f, _0x00b7, _0x00c0, min, max, _0x00c7, _0x00c8)
+local _0x00c2 = _0x0085._0x003a(string.char(84,101,120,116,76,97)..string.char(98,101,108), _0x00bf); _0x00c2._0x0038 = _0x0093._0x003a(0, _0x00b7, 0, _0x00c0); _0x00c2._0x00ad = _0x006f..string.char(58,32).._0x00c7; _0x00c2._0x00ae = _0x0028._0x00ae._0x00af; _0x00c2._0x00b1 = 10; _0x00c2._0x00b0 = _0x0012._0x0013(180, 180, 180); _0x00c2._0x00ac = 1; _0x00c2._0x00b2 = 0
+local _0x00c9 = _0x0085._0x003a(string.char(70,114,97)..string.char(109,101), _0x00bf); _0x00c9._0x00a1 = string.char(83,98,103); _0x00c9._0x0038 = _0x0093._0x003a(0, _0x00b7, 0, _0x00c0+14); _0x00c9._0x0094 = _0x0093._0x003a(0, 180, 0, 6); _0x00c9._0x0031 = _0x0012._0x0013(40, 40, 40); _0x00c9._0x0091 = 0
+local _0x00ca = _0x0085._0x003a(string.char(70,114,97,109)..string.char(101), _0x00c9); _0x00ca._0x0094 = _0x0093._0x003a((_0x00c7-min)/(max-min), 0, 1, 0); _0x00ca._0x0031 = _0x000b._0x0011; _0x00ca._0x0091 = 0
+local _0x00cb = _0x0085._0x003a(string.char(84,101,120,116,66)..string.char(117,116,116,111,110), _0x00bf); _0x00cb._0x0038 = _0x0093._0x003a(0, _0x00b7 + 190, 0, _0x00c0+10); _0x00cb._0x0094 = _0x0093._0x003a(0, 35, 0, 12); _0x00cb._0x0031 = _0x0012._0x0013(30, 30, 30); _0x00cb._0x00ad = string.char(114,101,115,101,116); _0x00cb._0x00ae = _0x0028._0x00ae._0x00af; _0x00cb._0x00b1 = 9; _0x00cb._0x00b0 = _0x0012._0x003a(1,1,1)
+local function _0x00cc(_0x0050) _0x0050 = math.floor(_0x0050 * 10) / 10; _0x00ca._0x0094 = _0x0093._0x003a((_0x0050-min)/(max-min), 0, 1, 0); _0x00c2._0x00ad = _0x006f..string.char(58,32).._0x0050; _0x00c8(_0x0050) end
+_0x00c9._0x0099:_0x0067(function(_0x00c4) if _0x00c4._0x009b == _0x0028._0x009b._0x009c then local _0x00cd; local function _0x00ce() local _0x00cf = math._0x00d0((_0x001b:_0x00d1()._0x007e - _0x00c9._0x00d2._0x007e) / _0x00c9._0x00d3._0x007e, 0, 1); _0x00cc(min + (max-min) * _0x00cf) end; _0x00ce(); _0x00cd = _0x001e._0x0066:_0x0067(function() if not _0x001b:_0x00d4(_0x0028._0x009b._0x009c) then _0x00cd:_0x00d5() else _0x00ce() end end) end end)
+_0x00cb._0x00b4:_0x0067(function() _0x00cc(_0x00c7) end)
 end
-
--- PAGE 1 CONTENT
-createCheck(MainPage, "void spam", 10, 10)
-createSlider(MainPage, "void drop", 10, 40, -10000000, 0, DEFAULTS.Void, function(v) CONFIG.VoidDepth = v end)
-createCheck(MainPage, "orbit", 10, 80)
-createSlider(MainPage, "map spread", 10, 110, 10, 10000, DEFAULTS.Spread, function(v) CONFIG.MapSpread = v end)
-createCheck(MainPage, "wallbang (tp)", 280, 10)
-createSlider(MainPage, "radius", 280, 40, 0, 50, DEFAULTS.Radius, function(v) CONFIG.OrbitRadius = v end)
-createSlider(MainPage, "speed", 280, 80, 1, 500, DEFAULTS.Speed, function(v) CONFIG.OrbitSpeed = v end)
-
-local HeightBtn = Instance.new("TextButton", MainPage); HeightBtn.Size = UDim2.new(0, 180, 0, 20); HeightBtn.Position = UDim2.new(0, 280, 0, 120); HeightBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35); HeightBtn.Text = "Height: Middle"; HeightBtn.Font = Enum.Font.Code; HeightBtn.TextColor3 = Color3.new(1,1,1); HeightBtn.TextSize = 11
-HeightBtn.MouseButton1Click:Connect(function() currentHeightIdx = (currentHeightIdx % #heightModes) + 1; local mode = heightModes[currentHeightIdx]; HeightBtn.Text = "Height: " .. mode; if mode == "Middle" then CONFIG.OrbitYOffset = 0.5 elseif mode == "Above" then CONFIG.OrbitYOffset = 8 elseif mode == "Under" then CONFIG.OrbitYOffset = -8 end end)
-
--- PAGE 2 CONTENT (Troll/Emotes)
-local function emoteBtn(name, catID, y)
-    local b = Instance.new("TextButton", TrollPage); b.Size = UDim2.new(0, 220, 0, 25); b.Position = UDim2.new(0, 10, 0, y); b.BackgroundColor3 = Color3.fromRGB(35, 35, 35); b.Text = name; b.Font = Enum.Font.Code; b.TextColor3 = Color3.fromRGB(200, 200, 200); b.TextSize = 11
-    b.MouseButton1Click:Connect(function() local animID = getAnimFromCatalog(catID); if danceActive and currentAnimID == animID then danceActive = false; if danceTrack then danceTrack:Stop() end; lp.Character.Animate.Disabled = false else currentAnimID = animID; danceActive = true end end)
+_0x00be(_0x00bb, string.char(118,111,105,100,32,115,112)..string.char(97,109), 10, 10)
+_0x00c6(_0x00bb, string.char(118,111,105)..string.char(100,32,100)..string.char(114,111,112), 10, 40, -10000000, 0, _0x0016._0x0019, function(_0x0050) _0x000b._0x000c = _0x0050 end)
+_0x00be(_0x00bb, string.char(111,114,98,105,116), 10, 80)
+_0x00c6(_0x00bb, string.char(109,97,112,32,115,112,114)..string.char(101,97,100), 10, 110, 10, 10000, _0x0016._0x001a, function(_0x0050) _0x000b._0x000f = _0x0050 end)
+_0x00be(_0x00bb, string.char(119,97,108,108)..string.char(98,97,110,103)..string.char(32,40,116,112)..string.char(41), 280, 10)
+_0x00c6(_0x00bb, string.char(114,97,100,105,117,115), 280, 40, 0, 50, _0x0016._0x0017, function(_0x0050) _0x000b._0x000d = _0x0050 end)
+_0x00c6(_0x00bb, string.char(115,112,101,101)..string.char(100), 280, 80, 1, 500, _0x0016._0x0018, function(_0x0050) _0x000b._0x000e = _0x0050 end)
+local _0x00d8 = _0x0085._0x003a(string.char(84,101,120,116,66,117,116)..string.char(116,111,110), _0x00bb); _0x00d8._0x0094 = _0x0093._0x003a(0, 180, 0, 20); _0x00d8._0x0038 = _0x0093._0x003a(0, 280, 0, 120); _0x00d8._0x0031 = _0x0012._0x0013(35, 35, 35); _0x00d8._0x00ad = string.char(72,101,105,103)..string.char(104,116,58,32)..string.char(77,105,100,100)..string.char(108,101); _0x00d8._0x00ae = _0x0028._0x00ae._0x00af; _0x00d8._0x00b0 = _0x0012._0x003a(1,1,1); _0x00d8._0x00b1 = 11
+_0x00d8._0x00b4:_0x0067(function() _0x0026 = (_0x0026 % #_0x0025) + 1; local _0x00d9 = _0x0025[_0x0026]; _0x00d8._0x00ad = string.char(72,101,105,103,104,116,58)..string.char(32) .. _0x00d9; if _0x00d9 == string.char(77,105,100)..string.char(100,108,101) then _0x000b._0x0010 = 0.5 elseif _0x00d9 == string.char(65,98,111,118,101) then _0x000b._0x0010 = 8 elseif _0x00d9 == string.char(85,110,100,101)..string.char(114) then _0x000b._0x0010 = -8 end end)
+local function _0x00dc(_0x002f, _0x00dd, _0x00c0)
+local _0x00b8 = _0x0085._0x003a(string.char(84,101,120,116,66,117)..string.char(116,116,111,110), _0x00bc); _0x00b8._0x0094 = _0x0093._0x003a(0, 220, 0, 25); _0x00b8._0x0038 = _0x0093._0x003a(0, 10, 0, _0x00c0); _0x00b8._0x0031 = _0x0012._0x0013(35, 35, 35); _0x00b8._0x00ad = _0x002f; _0x00b8._0x00ae = _0x0028._0x00ae._0x00af; _0x00b8._0x00b0 = _0x0012._0x0013(200, 200, 200); _0x00b8._0x00b1 = 11
+_0x00b8._0x00b4:_0x0067(function() local _0x00de = _0x003b(_0x00dd); if _0x0022 and _0x0024 == _0x00de then _0x0022 = false; if _0x0023 then _0x0023:_0x0059() end; _0x001f._0x004e._0x0061._0x0062 = false else _0x0024 = _0x00de; _0x0022 = true end end)
 end
-
--- Emote Search Box (Fixed Label and Placement)
-local SearchLabel = Instance.new("TextLabel", TrollPage); SearchLabel.Size = UDim2.new(0, 220, 0, 15); SearchLabel.Position = UDim2.new(0, 280, 0, 5); SearchLabel.BackgroundTransparency = 1; SearchLabel.Text = "emote id"; SearchLabel.Font = Enum.Font.Code; SearchLabel.TextColor3 = Color3.fromRGB(150, 150, 150); SearchLabel.TextSize = 10; SearchLabel.TextXAlignment = 0
-local SearchBox = Instance.new("TextBox", TrollPage); SearchBox.Size = UDim2.new(0, 220, 0, 25); SearchBox.Position = UDim2.new(0, 280, 0, 20); SearchBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30); SearchBox.BorderSizePixel = 1; SearchBox.BorderColor3 = CONFIG.BorderColor; SearchBox.Text = ""; SearchBox.PlaceholderText = "Emote ID Here..."; SearchBox.Font = Enum.Font.Code; SearchBox.TextColor3 = Color3.new(1,1,1); SearchBox.TextSize = 11
-local PlaySearch = Instance.new("TextButton", TrollPage); PlaySearch.Size = UDim2.new(0, 220, 0, 25); PlaySearch.Position = UDim2.new(0, 280, 0, 50); PlaySearch.BackgroundColor3 = CONFIG.AccentColor; PlaySearch.Text = "Play Emote"; PlaySearch.Font = Enum.Font.Code; PlaySearch.TextColor3 = Color3.new(1,1,1); PlaySearch.TextSize = 11
-
-PlaySearch.MouseButton1Click:Connect(function()
-    local rawID = SearchBox.Text:gsub("%D", "") 
-    if #rawID > 0 then
-        local animID = getAnimFromCatalog(rawID)
-        currentAnimID = animID
-        danceActive = true
-    end
+local _0x00e5 = _0x0085._0x003a(string.char(84,101,120,116,76,97)..string.char(98,101,108), _0x00bc); _0x00e5._0x0094 = _0x0093._0x003a(0, 220, 0, 15); _0x00e5._0x0038 = _0x0093._0x003a(0, 280, 0, 5); _0x00e5._0x00ac = 1; _0x00e5._0x00ad = string.char(101,109,111)..string.char(116,101,32)..string.char(105,100); _0x00e5._0x00ae = _0x0028._0x00ae._0x00af; _0x00e5._0x00b0 = _0x0012._0x0013(150, 150, 150); _0x00e5._0x00b1 = 10; _0x00e5._0x00b2 = 0
+local _0x00e6 = _0x0085._0x003a(string.char(84,101,120,116,66,111)..string.char(120), _0x00bc); _0x00e6._0x0094 = _0x0093._0x003a(0, 220, 0, 25); _0x00e6._0x0038 = _0x0093._0x003a(0, 280, 0, 20); _0x00e6._0x0031 = _0x0012._0x0013(30, 30, 30); _0x00e6._0x0091 = 1; _0x00e6._0x0092 = _0x000b._0x0015; _0x00e6._0x00ad = ""; _0x00e6._0x00e7 = string.char(69,109,111,116)..string.char(101,32,73,68)..string.char(32,72,101,114)..string.char(101,46,46,46); _0x00e6._0x00ae = _0x0028._0x00ae._0x00af; _0x00e6._0x00b0 = _0x0012._0x003a(1,1,1); _0x00e6._0x00b1 = 11
+local _0x00e8 = _0x0085._0x003a(string.char(84,101,120)..string.char(116,66,117)..string.char(116,116,111)..string.char(110), _0x00bc); _0x00e8._0x0094 = _0x0093._0x003a(0, 220, 0, 25); _0x00e8._0x0038 = _0x0093._0x003a(0, 280, 0, 50); _0x00e8._0x0031 = _0x000b._0x0011; _0x00e8._0x00ad = string.char(80,108,97,121,32)..string.char(69,109,111,116,101); _0x00e8._0x00ae = _0x0028._0x00ae._0x00af; _0x00e8._0x00b0 = _0x0012._0x003a(1,1,1); _0x00e8._0x00b1 = 11
+_0x00e8._0x00b4:_0x0067(function()
+local _0x00e9 = _0x00e6._0x00ad:gsub(string.char(37,68), "")
+if #_0x00e9 > 0 then
+local _0x00de = _0x003b(_0x00e9)
+_0x0024 = _0x00de
+_0x0022 = true
+end
 end)
-
-emoteBtn("Sinister Dance", "140307247566187", 5)
-emoteBtn("Tornado", "134029227396704", 35)
-emoteBtn("Zesty Sturdy", "120702604995324", 65)
-emoteBtn("Claw Machine", "138144229550843", 95)
-emoteBtn("67 Emote", "92707729249136", 125)
-emoteBtn("Spider Crawl", "71030475836153", 155)
-emoteBtn("Gun", "73562814360939", 185)
-
-UIS.InputBegan:Connect(function(i, p)
-    if not p and i.KeyCode == Enum.KeyCode.RightControl then Main.Visible = not Main.Visible
-    elseif not p and i.KeyCode ~= Enum.KeyCode.Unknown then
-        for name, key in pairs(Binds) do if i.KeyCode == key then states[name] = not states[name]; updateVisualToggles() end end
-    end
+_0x00dc(string.char(83,105,110,105,115)..string.char(116,101,114,32,68)..string.char(97,110,99,101), string.char(49,52,48,51,48)..string.char(55,50,52,55,53)..string.char(54,54,49,56,55), 5)
+_0x00dc(string.char(84,111,114)..string.char(110,97,100)..string.char(111), string.char(49,51,52,48,50,57,50)..string.char(50,55,51,57,54,55,48)..string.char(52), 35)
+_0x00dc(string.char(90,101,115,116,121)..string.char(32,83,116,117,114)..string.char(100,121), string.char(49,50,48,55,48,50,54)..string.char(48,52,57,57,53,51,50)..string.char(52), 65)
+_0x00dc(string.char(67,108,97)..string.char(119,32,77)..string.char(97,99,104)..string.char(105,110,101), string.char(49,51,56,49,52)..string.char(52,50,50,57,53)..string.char(53,48,56,52,51), 95)
+_0x00dc(string.char(54,55,32,69)..string.char(109,111,116,101), string.char(57,50,55,48)..string.char(55,55,50,57)..string.char(50,52,57,49)..string.char(51,54), 125)
+_0x00dc(string.char(83,112,105,100,101,114)..string.char(32,67,114,97,119,108), string.char(55,49,48,51,48)..string.char(52,55,53,56,51)..string.char(54,49,53,51), 155)
+_0x00dc(string.char(71,117,110), string.char(55,51,53,54,50,56,49)..string.char(52,51,54,48,57,51,57), 185)
+_0x001b._0x0099:_0x0067(function(_0x00c4, _0x00bf)
+if not _0x00bf and _0x00c4._0x0029 == _0x0028._0x0029._0x00ea then _0x0090._0x00bd = not _0x0090._0x00bd
+elseif not _0x00bf and _0x00c4._0x0029 ~= _0x0028._0x0029._0x002a then
+for _0x002f, _0x00eb in pairs(_0x0027) do if _0x00c4._0x0029 == _0x00eb then _0x002b[_0x002f] = not _0x002b[_0x002f]; _0x002e() end end
+end
 end)
